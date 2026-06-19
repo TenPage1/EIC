@@ -1,9 +1,9 @@
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * @file    dcmi.h
-  * @brief   This file contains all the function prototypes for
-  *          the dcmi.c file
+  * @file    icache.c
+  * @brief   This file provides code for the configuration
+  *          of the ICACHE instances.
   ******************************************************************************
   * @attention
   *
@@ -17,36 +17,37 @@
   ******************************************************************************
   */
 /* USER CODE END Header */
-/* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __DCMI_H__
-#define __DCMI_H__
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
+#include "icache.h"
 
-/* USER CODE BEGIN Includes */
+/* USER CODE BEGIN 0 */
 
-/* USER CODE END Includes */
+/* USER CODE END 0 */
 
-extern DCMI_HandleTypeDef hdcmi;
+/* ICACHE init function */
+void MX_ICACHE_Init(void)
+{
 
-/* USER CODE BEGIN Private defines */
+  /* USER CODE BEGIN ICACHE_Init 0 */
 
-/* USER CODE END Private defines */
+  /* USER CODE END ICACHE_Init 0 */
 
-void MX_DCMI_Init(void);
+  /* USER CODE BEGIN ICACHE_Init 1 */
 
-/* USER CODE BEGIN Prototypes */
+  /* USER CODE END ICACHE_Init 1 */
 
-/* USER CODE END Prototypes */
+  /** Enable instruction cache (default 2-ways set associative cache)
+  */
+  if (HAL_ICACHE_Enable() != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN ICACHE_Init 2 */
 
-#ifdef __cplusplus
+  /* USER CODE END ICACHE_Init 2 */
+
 }
-#endif
 
-#endif /* __DCMI_H__ */
+/* USER CODE BEGIN 1 */
 
+/* USER CODE END 1 */

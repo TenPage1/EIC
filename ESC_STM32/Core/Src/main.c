@@ -18,7 +18,9 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "dcmi.h"
+#include "adc.h"
+#include "icache.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -64,7 +66,7 @@ void SystemClock_Config(void);
   * @retval int
   */
 int main(void)
-   {
+{
 
   /* USER CODE BEGIN 1 */
 
@@ -88,10 +90,23 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_DCMI_Init();
   MX_UART5_Init();
+  MX_ADC1_Init();
+  MX_TIM15_Init();
+  MX_TIM16_Init();
+  MX_TIM17_Init();
+  MX_USART1_UART_Init();
+  MX_USART2_UART_Init();
+  MX_ICACHE_Init();
   /* USER CODE BEGIN 2 */
-		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_1,0);
+	HAL_TIM_Base_Start(&htim15);
+	HAL_TIM_Base_Start(&htim16);
+	HAL_TIM_Base_Start(&htim17);
+	HAL_TIM_PWM_Start(&htim15,TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim15,TIM_CHANNEL_2);
+	HAL_TIM_PWM_Start(&htim16,TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim17,TIM_CHANNEL_1);
+	//	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_1,0);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -101,21 +116,21 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		for(int i = 0;i<1000;i++)
-		{
-		HAL_GPIO_WritePin(DIR1_GPIO_Port,DIR1_Pin,1);
-		HAL_GPIO_WritePin(DIR0_GPIO_Port,DIR0_Pin,0);
-		HAL_GPIO_TogglePin(PUL1_GPIO_Port,PUL1_Pin);
-		HAL_Delay(2);
-		}
-		
-		for(int i =0 ;i<1000;i++)
-		{
-			HAL_GPIO_WritePin(DIR1_GPIO_Port,DIR1_Pin,0);
-		HAL_GPIO_WritePin(DIR0_GPIO_Port,DIR0_Pin,0);
-		HAL_GPIO_TogglePin(PUL1_GPIO_Port,PUL1_Pin);
-		HAL_Delay(2);
-		}
+//		for(int i = 0;i<1000;i++)
+//		{
+//		HAL_GPIO_WritePin(DIR1_GPIO_Port,DIR1_Pin,1);
+//		HAL_GPIO_WritePin(DIR0_GPIO_Port,DIR0_Pin,0);
+//		HAL_GPIO_TogglePin(PUL1_GPIO_Port,PUL1_Pin);
+//		HAL_Delay(2);
+//		}
+//		
+//		for(int i =0 ;i<1000;i++)
+//		{
+//			HAL_GPIO_WritePin(DIR1_GPIO_Port,DIR1_Pin,0);
+//		HAL_GPIO_WritePin(DIR0_GPIO_Port,DIR0_Pin,0);
+//		HAL_GPIO_TogglePin(PUL1_GPIO_Port,PUL1_Pin);
+//		HAL_Delay(2);
+//		}
 		
 //		HAL_GPIO_TogglePin (GPIOC,GPIO_PIN_1);
 //		HAL_Delay(1000);
@@ -142,8 +157,10 @@ void SystemClock_Config(void)
 
   /** Initializes the CPU, AHB and APB buses clocks
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLMBOOST = RCC_PLLMBOOST_DIV1;
