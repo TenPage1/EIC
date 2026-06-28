@@ -31,7 +31,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "mydriver.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -57,6 +57,12 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define DIR3_1_Pin GPIO_PIN_1
+#define DIR3_1_GPIO_Port GPIOC
+#define DIR3_0_Pin GPIO_PIN_2
+#define DIR3_0_GPIO_Port GPIOC
+#define PUL3_Pin GPIO_PIN_3
+#define PUL3_GPIO_Port GPIOC
 #define DIR1_1_Pin GPIO_PIN_0
 #define DIR1_1_GPIO_Port GPIOA
 #define DIR1_0_Pin GPIO_PIN_1

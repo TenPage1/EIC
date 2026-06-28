@@ -22,6 +22,7 @@
 #include "stm32u5xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -55,7 +56,11 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern TIM_HandleTypeDef htim8;
+extern UART_HandleTypeDef huart5;
 extern UART_HandleTypeDef huart1;
+extern TIM_HandleTypeDef htim7;
+
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -139,19 +144,6 @@ void UsageFault_Handler(void)
 }
 
 /**
-  * @brief This function handles System service call via SWI instruction.
-  */
-void SVC_Handler(void)
-{
-  /* USER CODE BEGIN SVCall_IRQn 0 */
-
-  /* USER CODE END SVCall_IRQn 0 */
-  /* USER CODE BEGIN SVCall_IRQn 1 */
-
-  /* USER CODE END SVCall_IRQn 1 */
-}
-
-/**
   * @brief This function handles Debug monitor.
   */
 void DebugMon_Handler(void)
@@ -164,39 +156,90 @@ void DebugMon_Handler(void)
   /* USER CODE END DebugMonitor_IRQn 1 */
 }
 
-/**
-  * @brief This function handles Pendable request for system service.
-  */
-void PendSV_Handler(void)
-{
-  /* USER CODE BEGIN PendSV_IRQn 0 */
-
-  /* USER CODE END PendSV_IRQn 0 */
-  /* USER CODE BEGIN PendSV_IRQn 1 */
-
-  /* USER CODE END PendSV_IRQn 1 */
-}
-
-/**
-  * @brief This function handles System tick timer.
-  */
-void SysTick_Handler(void)
-{
-  /* USER CODE BEGIN SysTick_IRQn 0 */
-
-  /* USER CODE END SysTick_IRQn 0 */
-  HAL_IncTick();
-  /* USER CODE BEGIN SysTick_IRQn 1 */
-
-  /* USER CODE END SysTick_IRQn 1 */
-}
-
 /******************************************************************************/
 /* STM32U5xx Peripheral Interrupt Handlers                                    */
 /* Add here the Interrupt Handlers for the used peripherals.                  */
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32u5xx.s).                    */
 /******************************************************************************/
+
+/**
+  * @brief This function handles TIM7 global interrupt.
+  */
+void TIM7_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM7_IRQn 0 */
+
+  /* USER CODE END TIM7_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim7);
+  /* USER CODE BEGIN TIM7_IRQn 1 */
+
+  /* USER CODE END TIM7_IRQn 1 */
+}
+
+/**
+  * @brief This function handles TIM8 Update interrupt.
+  */
+void TIM8_UP_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM8_UP_IRQn 0 */
+
+	{	//x���ƶ�
+	if(m42_x.now<m42_x.target)			
+	{
+		HAL_GPIO_WritePin(DIR1_0_GPIO_Port,DIR1_0_Pin,1);
+		HAL_GPIO_WritePin(DIR1_1_GPIO_Port,DIR1_1_Pin,1);
+		HAL_GPIO_TogglePin(PUL1_GPIO_Port,PUL1_Pin);
+		if(HAL_GPIO_ReadPin(PUL1_GPIO_Port,PUL1_Pin) == 1)
+		{
+			m42_x.now++;
+		}			
+	}
+	else if(m42_x.now>m42_x.target)
+	{
+		HAL_GPIO_WritePin(DIR1_0_GPIO_Port,DIR1_0_Pin,1);
+		HAL_GPIO_WritePin(DIR1_1_GPIO_Port,DIR1_1_Pin,0);
+		HAL_GPIO_TogglePin(PUL1_GPIO_Port,PUL1_Pin);
+		if(HAL_GPIO_ReadPin(PUL1_GPIO_Port,PUL1_Pin) == 1)
+		{
+			m42_x.now--;
+		}			
+	}
+	else{}
+	}		
+{	//y���ƶ�
+	if(m42_y.now<m42_y.target)		
+	{
+		HAL_GPIO_WritePin(DIR2_0_GPIO_Port,DIR2_0_Pin,1);
+		HAL_GPIO_WritePin(DIR2_1_GPIO_Port,DIR2_1_Pin,1);
+		HAL_GPIO_TogglePin(PUL2_GPIO_Port,PUL2_Pin);
+		if(HAL_GPIO_ReadPin(PUL2_GPIO_Port,PUL2_Pin) == 1)
+		{
+			m42_y.now++;
+		}			
+	}
+	else if(m42_y.now>m42_y.target)
+	{
+		HAL_GPIO_WritePin(DIR2_0_GPIO_Port,DIR2_0_Pin,1);
+		HAL_GPIO_WritePin(DIR2_1_GPIO_Port,DIR2_1_Pin,0);
+		HAL_GPIO_TogglePin(PUL2_GPIO_Port,PUL2_Pin);
+		if(HAL_GPIO_ReadPin(PUL2_GPIO_Port,PUL2_Pin) == 1)
+		{
+			m42_y.now--;
+		}			
+	}
+	else{}
+}	
+	
+	
+	
+	
+  /* USER CODE END TIM8_UP_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim8);
+  /* USER CODE BEGIN TIM8_UP_IRQn 1 */
+
+  /* USER CODE END TIM8_UP_IRQn 1 */
+}
 
 /**
   * @brief This function handles USART1 global interrupt.
@@ -210,6 +253,20 @@ void USART1_IRQHandler(void)
   /* USER CODE BEGIN USART1_IRQn 1 */
 
   /* USER CODE END USART1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles UART5 global interrupt.
+  */
+void UART5_IRQHandler(void)
+{
+  /* USER CODE BEGIN UART5_IRQn 0 */
+
+  /* USER CODE END UART5_IRQn 0 */
+  HAL_UART_IRQHandler(&huart5);
+  /* USER CODE BEGIN UART5_IRQn 1 */
+
+  /* USER CODE END UART5_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */
