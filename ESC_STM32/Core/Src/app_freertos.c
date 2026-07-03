@@ -128,10 +128,8 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-//		m42_x.now = 0;
-//		m42_x.target = 1000;
-//		m42_y.now = 0;
-//		m42_y.target = 1000;
+	
+		
 		
     osDelay(1);
   }
