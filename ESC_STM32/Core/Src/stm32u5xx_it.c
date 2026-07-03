@@ -188,7 +188,7 @@ void TIM8_UP_IRQHandler(void)
 	if(m42_x.now<m42_x.target)			
 	{
 		HAL_GPIO_WritePin(DIR1_0_GPIO_Port,DIR1_0_Pin,1);
-		HAL_GPIO_WritePin(DIR1_1_GPIO_Port,DIR1_1_Pin,1);
+		HAL_GPIO_WritePin(DIR1_1_GPIO_Port,DIR1_1_Pin,0);
 		HAL_GPIO_TogglePin(PUL1_GPIO_Port,PUL1_Pin);
 		if(HAL_GPIO_ReadPin(PUL1_GPIO_Port,PUL1_Pin) == 1)
 		{
@@ -198,7 +198,7 @@ void TIM8_UP_IRQHandler(void)
 	else if(m42_x.now>m42_x.target)
 	{
 		HAL_GPIO_WritePin(DIR1_0_GPIO_Port,DIR1_0_Pin,1);
-		HAL_GPIO_WritePin(DIR1_1_GPIO_Port,DIR1_1_Pin,0);
+		HAL_GPIO_WritePin(DIR1_1_GPIO_Port,DIR1_1_Pin,1);
 		HAL_GPIO_TogglePin(PUL1_GPIO_Port,PUL1_Pin);
 		if(HAL_GPIO_ReadPin(PUL1_GPIO_Port,PUL1_Pin) == 1)
 		{
@@ -211,7 +211,7 @@ void TIM8_UP_IRQHandler(void)
 	if(m42_y.now<m42_y.target)		
 	{
 		HAL_GPIO_WritePin(DIR2_0_GPIO_Port,DIR2_0_Pin,1);
-		HAL_GPIO_WritePin(DIR2_1_GPIO_Port,DIR2_1_Pin,1);
+		HAL_GPIO_WritePin(DIR2_1_GPIO_Port,DIR2_1_Pin,0);
 		HAL_GPIO_TogglePin(PUL2_GPIO_Port,PUL2_Pin);
 		if(HAL_GPIO_ReadPin(PUL2_GPIO_Port,PUL2_Pin) == 1)
 		{
@@ -221,7 +221,7 @@ void TIM8_UP_IRQHandler(void)
 	else if(m42_y.now>m42_y.target)
 	{
 		HAL_GPIO_WritePin(DIR2_0_GPIO_Port,DIR2_0_Pin,1);
-		HAL_GPIO_WritePin(DIR2_1_GPIO_Port,DIR2_1_Pin,0);
+		HAL_GPIO_WritePin(DIR2_1_GPIO_Port,DIR2_1_Pin,1);
 		HAL_GPIO_TogglePin(PUL2_GPIO_Port,PUL2_Pin);
 		if(HAL_GPIO_ReadPin(PUL2_GPIO_Port,PUL2_Pin) == 1)
 		{
