@@ -1,0 +1,3 @@
+EIC_STM32是烧录在咱的STM32U5主控里面的项目
+RTOS_TEST是之前调试FreeRTOS时用的测试项目
+TJC是烧录到串口屏里的项目
