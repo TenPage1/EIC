@@ -22,7 +22,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+//#include "main.h"
+#include "tim.h"
+#include "adc.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -128,9 +130,20 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	
+	static uint8_t pump_control = 0;
 		
+	static int crr = 100;
+	static uint16_t adc;
+	static uint32_t cnt = 0;
+		__HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, crr);//crr���½�Ϊ70���£�-120���ϣ�
+		adc = HAL_ADC_GetValue(&hadc1);
 		
+		cnt++;
+		if(cnt%1000 == 0)
+		{
+			HAL_GPIO_TogglePin(motor_control_GPIO_Port,motor_control_Pin);
+			HAL_GPIO_TogglePin(pump_control_GPIO_Port,pump_control_Pin);
+		}
     osDelay(1);
   }
   /* USER CODE END defaultTask */

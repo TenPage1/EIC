@@ -114,6 +114,7 @@ int main(void)
 	HAL_TIM_PWM_Start(&htim15,TIM_CHANNEL_2);
 	HAL_TIM_PWM_Start(&htim16,TIM_CHANNEL_1);
 	HAL_TIM_PWM_Start(&htim17,TIM_CHANNEL_1);
+	HAL_ADC_Start(&hadc1);
 	//	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_1,0);
 	
   /* USER CODE END 2 */

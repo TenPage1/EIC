@@ -77,6 +77,8 @@ void Error_Handler(void);
 #define PUL2_GPIO_Port GPIOA
 #define motor_control_Pin GPIO_PIN_4
 #define motor_control_GPIO_Port GPIOC
+#define pump_control_Pin GPIO_PIN_8
+#define pump_control_GPIO_Port GPIOE
 
 /* USER CODE BEGIN Private defines */
 

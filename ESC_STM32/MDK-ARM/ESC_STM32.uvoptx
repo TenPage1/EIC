@@ -154,7 +154,7 @@
           <Type>0</Type>
           <LineNumber>166</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134263190</Address>
+          <Address>134263998</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -170,7 +170,7 @@
           <Type>0</Type>
           <LineNumber>161</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134263188</Address>
+          <Address>134263996</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -202,6 +202,16 @@
           <count>3</count>
           <WinNumber>1</WinNumber>
           <ItemText>m42_y,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>4</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>crr,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>5</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>adc,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
