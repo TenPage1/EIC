@@ -12,6 +12,7 @@ struct motor_42
 	uint32_t speed;	//待开发
 };
 extern struct motor_42 m42_x,m42_y,m42_r;
+
 struct screen{
 	
 	
@@ -48,8 +49,8 @@ struct Object		//物体结构体
 	uint16_t y_camera;
 	uint16_t w_camera;
 	uint16_t h_camera;
-	uint16_t x_center;
-	uint16_t y_center;
+	uint32_t x_center;
+	uint32_t y_center;
 	uint16_t id;
 	float confidence ; //置信度
 	
@@ -74,3 +75,23 @@ struct Objects_Buffer
 extern struct Objects_Buffer objects_buffer;
 void objects_buffer_Init();
 //extern struct Objects objects;
+
+
+struct Robot_Run
+{
+	uint8_t if_get_target ;
+	uint8_t run_status;  ///0:不启动  1：获取目标物体 2：正在分拣
+	struct Object target_object;
+};
+extern struct Robot_Run robot_run;
+void Robot_Init();
+//上电初始位置
+#define Init_X 70000
+#define Init_Y 90000
+//坐标变换常数
+//motor_y = Ky * camera_center_x + Dy
+//motor_x = Kx * camera_cneter_y + Dx
+#define Ky 730   
+#define Kx 416
+#define Dy -52210
+#define Dx -11480

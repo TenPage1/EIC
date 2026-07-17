@@ -79,6 +79,12 @@ void Error_Handler(void);
 #define motor_control_GPIO_Port GPIOC
 #define pump_control_Pin GPIO_PIN_8
 #define pump_control_GPIO_Port GPIOE
+#define valve_control_Pin GPIO_PIN_9
+#define valve_control_GPIO_Port GPIOE
+#define x_button_Pin GPIO_PIN_10
+#define x_button_GPIO_Port GPIOE
+#define y_button_Pin GPIO_PIN_11
+#define y_button_GPIO_Port GPIOE
 
 /* USER CODE BEGIN Private defines */
 

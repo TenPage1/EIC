@@ -57,7 +57,7 @@ void MX_GPIO_Init(void)
                           |DIR2_0_Pin|PUL2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(pump_control_GPIO_Port, pump_control_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOE, pump_control_Pin|valve_control_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : DIR3_1_Pin DIR3_0_Pin PUL3_Pin motor_control_Pin */
   GPIO_InitStruct.Pin = DIR3_1_Pin|DIR3_0_Pin|PUL3_Pin|motor_control_Pin;
@@ -75,17 +75,17 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : pump_control_Pin */
-  GPIO_InitStruct.Pin = pump_control_Pin;
+  /*Configure GPIO pins : pump_control_Pin valve_control_Pin */
+  GPIO_InitStruct.Pin = pump_control_Pin|valve_control_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(pump_control_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PE9 PE10 */
-  GPIO_InitStruct.Pin = GPIO_PIN_9|GPIO_PIN_10;
+  /*Configure GPIO pins : x_button_Pin y_button_Pin */
+  GPIO_InitStruct.Pin = x_button_Pin|y_button_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
 }

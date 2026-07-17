@@ -2,7 +2,7 @@
 
 
 
-struct motor_42 m42_x,m42_y;
+struct motor_42 m42_x,m42_y,m42_r;
 
 
 
@@ -36,4 +36,13 @@ void objects_buffer_Init()
 {
 	objects_buffer.read = 0;
 	objects_buffer.write = 0;
+}
+
+
+struct Robot_Run robot_run;
+void Robot_Init()
+{
+	robot_run.if_get_target = 0;
+	robot_run.run_status = 0;
+	
 }

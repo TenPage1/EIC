@@ -70,7 +70,7 @@ void MX_FREERTOS_Init(void);
   * @retval int
   */
 int main(void)
-{
+   {
 
   /* USER CODE BEGIN 1 */
 
@@ -211,15 +211,13 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	{
 		camera_uart_buffer.buffer[camera_uart_buffer.write] = camera_uart_buffer.receive_data;
 		camera_uart_buffer.write = (camera_uart_buffer.write+1)%Uart_Buffer_Len;
+	
+
+		//�¼���refreeSystemTask���д��ڻ����������ݷְ��ͻ���֡ͷ�Ľ���
 		
 	}
 	
 		
-//	if((camera_uart_buffer.write-camera_uart_buffer.read+Uart_Buffer_Len)%Uart_Buffer_Len >(uint16_t)(0.4*Uart_Buffer_Len))
-//	{
-//		xTaskResumeFromISR(refreeSystemTaskHandle);
-//	}
-//		
 		
 
 	
