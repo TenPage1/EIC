@@ -115,6 +115,9 @@ int main(void)
 	HAL_TIM_PWM_Start(&htim16,TIM_CHANNEL_1);
 	HAL_TIM_PWM_Start(&htim17,TIM_CHANNEL_1);
 	HAL_ADC_Start(&hadc1);
+	HAL_UART_Receive_IT(&huart1,&camera_uart_buffer.receive_data,1);
+	Uart1_Buffer_Init();
+	objects_buffer_Init();
 	//	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_1,0);
 	
   /* USER CODE END 2 */
@@ -137,24 +140,6 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 		
-//		for(int i = 0;i<1000;i++)
-//		{
-//		HAL_GPIO_WritePin(DIR1_GPIO_Port,DIR1_Pin,1);
-//		HAL_GPIO_WritePin(DIR0_GPIO_Port,DIR0_Pin,0);
-//		HAL_GPIO_TogglePin(PUL1_GPIO_Port,PUL1_Pin);
-//		HAL_Delay(2);
-//		}
-//		
-//		for(int i =0 ;i<1000;i++)
-//		{
-//			HAL_GPIO_WritePin(DIR1_GPIO_Port,DIR1_Pin,0);
-//		HAL_GPIO_WritePin(DIR0_GPIO_Port,DIR0_Pin,0);
-//		HAL_GPIO_TogglePin(PUL1_GPIO_Port,PUL1_Pin);
-//		HAL_Delay(2);
-//		}
-		
-//		HAL_GPIO_TogglePin (GPIOC,GPIO_PIN_1);
-//		HAL_Delay(1000);
 
   }
   /* USER CODE END 3 */
@@ -216,6 +201,31 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	static uint8_t cnt_uart1 = 0;
+//	uint8_t receive_data;
+	static uint8_t r_status_uart1 = 0;
+
+	if(huart->Instance == USART1)				
+	{
+		camera_uart_buffer.buffer[camera_uart_buffer.write] = camera_uart_buffer.receive_data;
+		camera_uart_buffer.write = (camera_uart_buffer.write+1)%Uart_Buffer_Len;
+		
+	}
+	
+		
+//	if((camera_uart_buffer.write-camera_uart_buffer.read+Uart_Buffer_Len)%Uart_Buffer_Len >(uint16_t)(0.4*Uart_Buffer_Len))
+//	{
+//		xTaskResumeFromISR(refreeSystemTaskHandle);
+//	}
+//		
+		
+
+	
+	
+	
+}
 /* USER CODE END 4 */
 
 /**
