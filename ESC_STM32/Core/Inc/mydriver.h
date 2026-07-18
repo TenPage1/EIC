@@ -11,13 +11,21 @@ struct motor_42
 	uint32_t now;
 	uint32_t speed;	//待开发
 };
-extern struct motor_42 m42_x,m42_y,m42_r;
 
-struct screen{
-	
-	
-	
+#define m42_r_60 262 
+
+extern struct motor_42 m42_x,m42_y,m42_r;
+	#define m42_r_CNT 60
+
+#define ID_NUM 7
+struct Screen	//串口屏结构体
+{	
+	uint8_t id_cnt[ID_NUM];
+
 };
+
+extern struct Screen	screen;//串口屏结构体
+void screen_Init();		//串口屏结构体使能
 
 
 
@@ -61,8 +69,15 @@ struct Objects			//每帧数据包含物体结构体
 {
 	struct Object obj[Object_Len];
 	uint8_t object_num;
+	uint32_t get_time;
 };
 
+#define MAX_Target_Objects 200			//最大分拣物体数量
+struct Target_Objects					//已分捡物体存储
+{
+	struct Object objects[MAX_Target_Objects];
+	uint8_t get_num;
+};
 
 
 #define Objects_Buffer_Len 20
@@ -80,8 +95,9 @@ void objects_buffer_Init();
 struct Robot_Run
 {
 	uint8_t if_get_target ;
-	uint8_t run_status;  ///0:不启动  1：获取目标物体 2：正在分拣
+	uint8_t run_status;  ///0:不启动  1：获取目标物体 2：正在分拣 3:回到原点 4：全手动
 	struct Object target_object;
+	struct Target_Objects target_objects;
 };
 extern struct Robot_Run robot_run;
 void Robot_Init();
@@ -91,7 +107,7 @@ void Robot_Init();
 //坐标变换常数
 //motor_y = Ky * camera_center_x + Dy
 //motor_x = Kx * camera_cneter_y + Dx
-#define Ky 730   
-#define Kx 416
-#define Dy -52210
-#define Dx -11480
+#define Ky 969.7
+#define Kx 418.6
+#define Dy -68426.6
+#define Dx -18743.8

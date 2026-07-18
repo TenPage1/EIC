@@ -31,7 +31,8 @@ bool find_Header()					//检验当前位是否位于帧头，用于摄像头Uart缓冲区处理
 }
 
 
-struct Objects_Buffer objects_buffer;
+
+struct Objects_Buffer objects_buffer;			//物体缓冲区结构体
 void objects_buffer_Init()
 {
 	objects_buffer.read = 0;
@@ -44,5 +45,17 @@ void Robot_Init()
 {
 	robot_run.if_get_target = 0;
 	robot_run.run_status = 0;
+	robot_run.target_objects.get_num = 0;
 	
+}
+
+
+struct Screen	screen ;		//串口屏结构体
+void screen_Init()
+{
+	for(int i = 0;i<ID_NUM;i++)
+	{
+		screen.id_cnt[i] = '0';
+	}
+
 }

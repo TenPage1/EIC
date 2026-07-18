@@ -59,6 +59,7 @@ extern osThreadId_t refreeSystemTaskHandle;
 extern osThreadId_t motor_init_taskHandle;
 extern osThreadId_t Objects_Buffer_TaskHandle;
 extern osThreadId_t run_TaskHandle;
+extern osThreadId_t Screen_Send_TaskHandle;
 
 /* Exported function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -70,6 +71,7 @@ void refreeSystemTask(void *argument);
 void motor_init_task(void *argument);
 void Objects_Buffer_Task(void *argument);
 void run_Task(void *argument);
+void Screen_Send_Task(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 

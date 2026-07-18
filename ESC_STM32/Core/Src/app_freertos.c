@@ -25,6 +25,7 @@
 #include "main.h"
 #include "tim.h"
 #include "adc.h"
+#include "usart.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,7 +50,7 @@ typedef StaticTask_t osStaticThreadDef_t;
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
-uint32_t MyBufferTask00[ 128 ];
+uint32_t MyBufferTask00[ 256 ];
 osStaticThreadDef_t MycontrolBlocTask00;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
@@ -61,7 +62,7 @@ const osThreadAttr_t defaultTask_attributes = {
 };
 /* Definitions for refreeSystemTask */
 osThreadId_t refreeSystemTaskHandle;
-uint32_t MyBuffer_refree_task[ 128 ];
+uint32_t MyBuffer_refree_task[ 1280 ];
 osStaticThreadDef_t MycontrolBloc_refree_task;
 const osThreadAttr_t refreeSystemTask_attributes = {
   .name = "refreeSystemTask",
@@ -73,7 +74,7 @@ const osThreadAttr_t refreeSystemTask_attributes = {
 };
 /* Definitions for motor_init_task */
 osThreadId_t motor_init_taskHandle;
-uint32_t MyBufferTask04[ 128 ];
+uint32_t MyBufferTask04[ 256 ];
 osStaticThreadDef_t MycontrolBlocTask04;
 const osThreadAttr_t motor_init_task_attributes = {
   .name = "motor_init_task",
@@ -85,7 +86,7 @@ const osThreadAttr_t motor_init_task_attributes = {
 };
 /* Definitions for Objects_Buffer_Task */
 osThreadId_t Objects_Buffer_TaskHandle;
-uint32_t MyBufferTask05[ 128 ];
+uint32_t MyBufferTask05[ 1280 ];
 osStaticThreadDef_t MycontrolBlocTask05;
 const osThreadAttr_t Objects_Buffer_Task_attributes = {
   .name = "Objects_Buffer_Task",
@@ -97,7 +98,7 @@ const osThreadAttr_t Objects_Buffer_Task_attributes = {
 };
 /* Definitions for run_Task */
 osThreadId_t run_TaskHandle;
-uint32_t MyBufferTask06[ 128 ];
+uint32_t MyBufferTask06[ 1280 ];
 osStaticThreadDef_t MycontrolBlocTask06;
 const osThreadAttr_t run_Task_attributes = {
   .name = "run_Task",
@@ -105,6 +106,18 @@ const osThreadAttr_t run_Task_attributes = {
   .stack_size = sizeof(MyBufferTask06),
   .cb_mem = &MycontrolBlocTask06,
   .cb_size = sizeof(MycontrolBlocTask06),
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for Screen_Send_Task */
+osThreadId_t Screen_Send_TaskHandle;
+uint32_t MyBufferTask07[ 512 ];
+osStaticThreadDef_t MycontrolBlocTask07;
+const osThreadAttr_t Screen_Send_Task_attributes = {
+  .name = "Screen_Send_Task",
+  .stack_mem = &MyBufferTask07[0],
+  .stack_size = sizeof(MyBufferTask07),
+  .cb_mem = &MycontrolBlocTask07,
+  .cb_size = sizeof(MycontrolBlocTask07),
   .priority = (osPriority_t) osPriorityLow,
 };
 
@@ -153,6 +166,9 @@ void MX_FREERTOS_Init(void) {
   /* creation of run_Task */
   run_TaskHandle = osThreadNew(run_Task, NULL, &run_Task_attributes);
 
+  /* creation of Screen_Send_Task */
+  Screen_Send_TaskHandle = osThreadNew(Screen_Send_Task, NULL, &Screen_Send_Task_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
 	
@@ -185,14 +201,21 @@ void StartDefaultTask(void *argument)
 	static uint32_t cnt = 0;
 		__HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, crr);//crr���½�Ϊ70���£�-120���ϣ�
 		adc = HAL_ADC_GetValue(&hadc1);
-		
+		vTaskSuspend(defaultTaskHandle );
+//		
+//	char send_text[13] = "t1.txt=\"2\"";
+//		send_text[10] = 0xFF;
+//		send_text[11] = 0xFF;
+//		send_text[12] = 0xFF;
+//	HAL_UART_Transmit( &huart5, (uint8_t*)send_text, 13, 100);
+//	osDelay(200);
 	//	cnt++;
 //		if(cnt%1000 == 0)
 //		{
 //			HAL_GPIO_TogglePin(motor_control_GPIO_Port,motor_control_Pin);
 //			HAL_GPIO_TogglePin(pump_control_GPIO_Port,pump_control_Pin);
 //		}
-    osDelay(1);
+//    osDelay(1);
   }
   /* USER CODE END defaultTask */
 }
@@ -208,6 +231,7 @@ void refreeSystemTask(void *argument)
 {
   /* USER CODE BEGIN refreeSystemTask */
   /* Infinite loop */
+//osDelay(100);
 while(1)
 {
 	if((camera_uart_buffer.write-camera_uart_buffer.read+Uart_Buffer_Len)%Uart_Buffer_Len >(uint16_t)(0.4*Uart_Buffer_Len))
@@ -222,6 +246,7 @@ while(1)
 				if((camera_uart_buffer.write-camera_uart_buffer.read+Uart_Buffer_Len)%Uart_Buffer_Len > camera_uart_buffer.buffer[camera_uart_buffer.read+4]+8)	//有效帧判别
 				{
 					objects_buffer.buffer[objects_buffer.write].object_num = (camera_uart_buffer.buffer[camera_uart_buffer.read+4]-4)/14;   //物体个数处理
+					objects_buffer.buffer[objects_buffer.write].get_time = HAL_GetTick();
 					for(int i = 0;i<objects_buffer.buffer[objects_buffer.write].object_num;i++)  
 					{
 						objects_buffer.buffer[objects_buffer.write].obj[i].x_camera = camera_uart_buffer.buffer[camera_uart_buffer.read+10]+(camera_uart_buffer.buffer[camera_uart_buffer.read+11]<<8);
@@ -229,15 +254,22 @@ while(1)
 						objects_buffer.buffer[objects_buffer.write].obj[i].w_camera = camera_uart_buffer.buffer[camera_uart_buffer.read+14]+(camera_uart_buffer.buffer[camera_uart_buffer.read+15]<<8);
 						objects_buffer.buffer[objects_buffer.write].obj[i].h_camera = camera_uart_buffer.buffer[camera_uart_buffer.read+16]+(camera_uart_buffer.buffer[camera_uart_buffer.read+17]<<8);
 						objects_buffer.buffer[objects_buffer.write].obj[i].id = camera_uart_buffer.buffer[camera_uart_buffer.read+18]+(camera_uart_buffer.buffer[camera_uart_buffer.read+19]<<8);
+						
+						if(objects_buffer.buffer[objects_buffer.write].obj[i].id == 6)			//将黄圆柱都改为黄圆锥
+						{
+							objects_buffer.buffer[objects_buffer.write].obj[i].id = 0;
+						}
+						
 						objects_buffer.buffer[objects_buffer.write].obj[i].confidence = (float)(camera_uart_buffer.buffer[camera_uart_buffer.read+20]+(camera_uart_buffer.buffer[camera_uart_buffer.read+21]<<8)+(camera_uart_buffer.buffer[camera_uart_buffer.read+22]<<16)+(camera_uart_buffer.buffer[camera_uart_buffer.read+23]<<24));
 						
 						
-							//未开发：进行xywh数据处理并计算得物体中心坐标
-						objects_buffer.buffer[objects_buffer.write].obj[i].y_center = Ky * (objects_buffer.buffer[objects_buffer.write].obj[i].y_camera + objects_buffer.buffer[objects_buffer.write].obj[i].h_camera/2) + Dy;
-						objects_buffer.buffer[objects_buffer.write].obj[i].x_center = Kx * (objects_buffer.buffer[objects_buffer.write].obj[i].x_camera + objects_buffer.buffer[objects_buffer.write].obj[i].w_camera/2) + Dx;
+							//进行xywh数据处理并计算得物体中心坐标
+						objects_buffer.buffer[objects_buffer.write].obj[i].y_center = Ky * (objects_buffer.buffer[objects_buffer.write].obj[i].x_camera + objects_buffer.buffer[objects_buffer.write].obj[i].h_camera/2) + Dy;
+						objects_buffer.buffer[objects_buffer.write].obj[i].x_center = Kx * (objects_buffer.buffer[objects_buffer.write].obj[i].y_camera + objects_buffer.buffer[objects_buffer.write].obj[i].w_camera/2) + Dx;
+						objects_buffer.buffer[objects_buffer.write].get_time = HAL_GetTick();
 						//盘内检验
 						//正在开发
-						if(objects_buffer.buffer[objects_buffer.write].obj[i].x_center < 0 || objects_buffer.buffer[objects_buffer.write].obj[i].y_center < 0 || objects_buffer.buffer[objects_buffer.write].obj[i].x_center > 50000 || objects_buffer.buffer[objects_buffer.write].obj[i].y_center > 90000)							
+						if(objects_buffer.buffer[objects_buffer.write].obj[i].x_center < 0 || objects_buffer.buffer[objects_buffer.write].obj[i].y_center < 15000 || objects_buffer.buffer[objects_buffer.write].obj[i].x_center > 50000 || objects_buffer.buffer[objects_buffer.write].obj[i].y_center > 90000)							
 						{
 							objects_buffer.buffer[objects_buffer.write].object_num --;
 							i--;
@@ -247,8 +279,10 @@ while(1)
 //							}
 						}
 						
+						
 					}
 					objects_buffer.write = (objects_buffer.write+1)%Objects_Buffer_Len;				//objects缓冲区取模自增
+					
 					
 					//下级见Objects_Buffer_Task进行物体缓冲区的滤波和分拣业务处理
 
@@ -333,7 +367,7 @@ void motor_init_task(void *argument)
 	m42_y.now  = Init_Y;
 	m42_y.target = Init_Y;
 	
-	vTaskSuspend(motor_init_taskHandle );
+	vTaskSuspend(motor_init_taskHandle);
 	
 	
   /* USER CODE END motor_init_task */
@@ -346,13 +380,14 @@ void motor_init_task(void *argument)
 * @retval None
 */
 /* USER CODE END Header_Objects_Buffer_Task */
-void Objects_Buffer_Task(void *argument)			//物体缓冲区处理
+void Objects_Buffer_Task(void *argument)
 {
   /* USER CODE BEGIN Objects_Buffer_Task */
   /* Infinite loop */
+//osDelay(100);
  while(1)
  {
-		if(objects_buffer.buffer[(objects_buffer.write-1+Objects_Buffer_Len)%Objects_Buffer_Len].object_num != 0 )
+		if(objects_buffer.buffer[(objects_buffer.write-1+Objects_Buffer_Len)%Objects_Buffer_Len].object_num != 0 && (HAL_GetTick()-objects_buffer.buffer[(objects_buffer.write-1+Objects_Buffer_Len)%Objects_Buffer_Len].get_time) <1000	)
 		{
 			robot_run.target_object = objects_buffer.buffer[(objects_buffer.write-1+Objects_Buffer_Len)%Objects_Buffer_Len].obj[0];
 			robot_run.if_get_target = 1;
@@ -378,16 +413,52 @@ void run_Task(void *argument)
   while(1)
 	{
 		static struct Object target_object ;
-	  //robot_run.if_get_target = 0;
+	  robot_run.if_get_target = 0;
 		if(robot_run.run_status == 0 && robot_run.if_get_target == 1)
 		{
 			target_object = robot_run.target_object;
+			
+			
+			robot_run.target_objects.objects[robot_run.target_objects.get_num] = target_object;			//压入已分拣序列
+			robot_run.target_objects.get_num++;
+			
+			switch(robot_run.target_object.id)
+			{
+				case 0: case 6:
+					m42_r.target = 0;
+					break;
+				case 1:
+					m42_r.target = m42_r_60;
+					break;
+				case 2:
+					m42_r.target = 2*m42_r_60;
+					break;
+				case 3:
+					m42_r.target = 3*m42_r_60;
+					break;
+				case 4:
+					m42_r.target = 4*m42_r_60;
+					break;
+				case 5:
+					m42_r.target = 5*m42_r_60;
+					break;
+				
+			}
 			robot_run.run_status = 2;
+			
+			
+			
+			
 		}
 		if(robot_run.run_status == 2)
 		{
 			m42_x.target = target_object.x_center;
 			m42_y.target = target_object.y_center;
+			
+			
+
+			
+			
 			while(m42_x.target !=m42_x.now || m42_y.target !=m42_y.now)
 			{
 				osDelay(1);
@@ -397,23 +468,72 @@ void run_Task(void *argument)
 			HAL_GPIO_WritePin(pump_control_GPIO_Port,pump_control_Pin,1);
 			osDelay(1000);
 			m42_x.target = Init_X;
-			m42_y.target = Init_Y-40000;
+			m42_y.target = Init_Y-55000;
 			__HAL_TIM_SET_COMPARE(&htim15, TIM_CHANNEL_1, 125);
 			osDelay(100);
-			while(m42_x.target !=m42_x.now || m42_y.target !=m42_y.now)
+			while(m42_x.target !=m42_x.now || m42_y.target !=m42_y.now || m42_r.target !=m42_r.now)
 			{
 				osDelay(1);
 			}
-			HAL_GPIO_WritePin(pump_control_GPIO_Port,pump_control_Pin,0);
+			HAL_GPIO_WritePin(pump_control_GPIO_Port,pump_control_Pin,0);		//松夹爪
 			osDelay(100);
 			
-			robot_run.run_status = 0;
+			
+		char send_text[14] = "t10.txt=\"0\"";						//发送串口屏
+		send_text[2]+=target_object.id;
+		screen.id_cnt[target_object.id]++;
+		send_text[9]=screen.id_cnt[target_object.id];
+		send_text[11] = 0xFF;
+		send_text[12] = 0xFF;
+		send_text[13] = 0xFF;
+		HAL_UART_Transmit( &huart5, (uint8_t*)send_text, 14, 10);
+		osDelay(15);
+		HAL_UART_Transmit( &huart5, (uint8_t*)send_text, 14, 10);
+		osDelay(15);
+		HAL_UART_Transmit( &huart5, (uint8_t*)send_text, 14, 10);
+		osDelay(15);
+			
+			
+		if(robot_run.run_status == 2)
+		{robot_run.run_status = 0;}
+			
 			robot_run.if_get_target = 0;
 		}
-	
-	
+		if(robot_run.run_status == 3)	//复位模式
+	{
+		m42_x.target = Init_X;
+		m42_x.target = Init_Y;
+	}
+	if(robot_run.run_status == 4)		//全手动模式
+	{
+		
+	}
 	}
   /* USER CODE END run_Task */
+}
+
+/* USER CODE BEGIN Header_Screen_Send_Task */
+/**
+* @brief Function implementing the Screen_Send_Task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Screen_Send_Task */
+void Screen_Send_Task(void *argument)
+{
+  /* USER CODE BEGIN Screen_Send_Task */
+  /* Infinite loop */
+  for(;;)
+  {
+//		char send_text[14] = "t10.txt=\"0\"";
+////		send_text[3]+=
+//		send_text[11] = 0xFF;
+//		send_text[12] = 0xFF;
+//		send_text[13] = 0xFF;
+//		HAL_UART_Transmit( &huart5, (uint8_t*)send_text, 14, 100);
+//		osDelay(200);
+  }
+  /* USER CODE END Screen_Send_Task */
 }
 
 /* Private application code --------------------------------------------------*/

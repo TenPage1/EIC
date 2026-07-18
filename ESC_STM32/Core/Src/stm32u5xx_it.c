@@ -230,29 +230,37 @@ void TIM8_UP_IRQHandler(void)
 	}
 	else{}
 		
-	if(m42_r.now < m42_r.target)		
-{
-	HAL_GPIO_WritePin(DIR3_0_GPIO_Port, DIR3_0_Pin, 1);
-	HAL_GPIO_WritePin(DIR3_1_GPIO_Port, DIR3_1_Pin, 0);
-	HAL_GPIO_TogglePin(PUL3_GPIO_Port, PUL3_Pin);
-	if(HAL_GPIO_ReadPin(PUL3_GPIO_Port, PUL3_Pin) == 1)
+		
+		
+
+		
+	static uint8_t m42_r_cnt = 0;
+	m42_r_cnt  = (m42_r_cnt + 1)%m42_r_CNT;
+	if (m42_r_cnt == m42_r_CNT-1)
 	{
-		m42_r.now++;
-	}			
-}
-else if(m42_r.now > m42_r.target)
-{
-	HAL_GPIO_WritePin(DIR3_0_GPIO_Port, DIR3_0_Pin, 1);
-	HAL_GPIO_WritePin(DIR3_1_GPIO_Port, DIR3_1_Pin, 1);
-	HAL_GPIO_TogglePin(PUL3_GPIO_Port, PUL3_Pin);
-	if(HAL_GPIO_ReadPin(PUL3_GPIO_Port, PUL3_Pin) == 1)
-	{
-		m42_r.now--;
-	}			
-}
-else{}
-}	
-	
+			if(m42_r.now < m42_r.target)		
+		{
+			HAL_GPIO_WritePin(DIR3_0_GPIO_Port, DIR3_0_Pin, 1);
+			HAL_GPIO_WritePin(DIR3_1_GPIO_Port, DIR3_1_Pin, 0);
+			HAL_GPIO_TogglePin(PUL3_GPIO_Port, PUL3_Pin);
+			if(HAL_GPIO_ReadPin(PUL3_GPIO_Port, PUL3_Pin) == 1)
+			{
+				m42_r.now++;
+			}			
+		}
+		else if(m42_r.now > m42_r.target)
+		{
+			HAL_GPIO_WritePin(DIR3_0_GPIO_Port, DIR3_0_Pin, 1);
+			HAL_GPIO_WritePin(DIR3_1_GPIO_Port, DIR3_1_Pin, 1);
+			HAL_GPIO_TogglePin(PUL3_GPIO_Port, PUL3_Pin);
+			if(HAL_GPIO_ReadPin(PUL3_GPIO_Port, PUL3_Pin) == 1)
+			{
+				m42_r.now--;
+			}			
+		}
+		else{}
+		}	
+	}
 	
 	
 	

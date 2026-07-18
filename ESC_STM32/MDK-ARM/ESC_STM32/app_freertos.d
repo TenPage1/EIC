@@ -47,4 +47,5 @@ esc_stm32/app_freertos.o: ..\Core\Src\app_freertos.c \
   ..\Drivers\STM32U5xx_HAL_Driver\Inc\stm32u5xx_hal_exti.h \
   ..\Core\Inc\mydriver.h \
   ..\Middlewares\Third_Party\CMSIS\RTOS2\Include\cmsis_os2.h \
-  ..\Core\Inc\main.h ..\Core\Inc\tim.h ..\Core\Inc\adc.h
+  ..\Core\Inc\main.h ..\Core\Inc\tim.h ..\Core\Inc\adc.h \
+  ..\Core\Inc\usart.h

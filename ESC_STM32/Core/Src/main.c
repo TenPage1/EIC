@@ -118,6 +118,7 @@ int main(void)
 	HAL_UART_Receive_IT(&huart1,&camera_uart_buffer.receive_data,1);
 	Uart1_Buffer_Init();
 	objects_buffer_Init();
+	screen_Init();
 	//	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_1,0);
 	
   /* USER CODE END 2 */
