@@ -227,92 +227,103 @@ void StartDefaultTask(void *argument)
 * @retval None
 */
 /* USER CODE END Header_refreeSystemTask */
+/* USER CODE BEGIN Header_refreeSystemTask */
+/**
+* @brief Function implementing the refreeSystemTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_refreeSystemTask */
 void refreeSystemTask(void *argument)
 {
   /* USER CODE BEGIN refreeSystemTask */
   /* Infinite loop */
-//osDelay(100);
-while(1)
-{
-	if((camera_uart_buffer.write-camera_uart_buffer.read+Uart_Buffer_Len)%Uart_Buffer_Len >(uint16_t)(0.4*Uart_Buffer_Len))
-	{
-		//处理摄像头数据		
-		
-		for(;(camera_uart_buffer.write-camera_uart_buffer.read+Uart_Buffer_Len)%Uart_Buffer_Len>4;camera_uart_buffer.read = (camera_uart_buffer.read+1)%Uart_Buffer_Len )
-		{
-			if(find_Header())			//发现帧头
-			{
-				
-				if((camera_uart_buffer.write-camera_uart_buffer.read+Uart_Buffer_Len)%Uart_Buffer_Len > camera_uart_buffer.buffer[camera_uart_buffer.read+4]+8)	//有效帧判别
-				{
-					objects_buffer.buffer[objects_buffer.write].object_num = (camera_uart_buffer.buffer[camera_uart_buffer.read+4]-4)/14;   //物体个数处理
-					objects_buffer.buffer[objects_buffer.write].get_time = HAL_GetTick();
-					for(int i = 0;i<objects_buffer.buffer[objects_buffer.write].object_num;i++)  
-					{
-						objects_buffer.buffer[objects_buffer.write].obj[i].x_camera = camera_uart_buffer.buffer[camera_uart_buffer.read+10]+(camera_uart_buffer.buffer[camera_uart_buffer.read+11]<<8);
-						objects_buffer.buffer[objects_buffer.write].obj[i].y_camera = camera_uart_buffer.buffer[camera_uart_buffer.read+12]+(camera_uart_buffer.buffer[camera_uart_buffer.read+13]<<8);
-						objects_buffer.buffer[objects_buffer.write].obj[i].w_camera = camera_uart_buffer.buffer[camera_uart_buffer.read+14]+(camera_uart_buffer.buffer[camera_uart_buffer.read+15]<<8);
-						objects_buffer.buffer[objects_buffer.write].obj[i].h_camera = camera_uart_buffer.buffer[camera_uart_buffer.read+16]+(camera_uart_buffer.buffer[camera_uart_buffer.read+17]<<8);
-						objects_buffer.buffer[objects_buffer.write].obj[i].id = camera_uart_buffer.buffer[camera_uart_buffer.read+18]+(camera_uart_buffer.buffer[camera_uart_buffer.read+19]<<8);
-						
-						if(objects_buffer.buffer[objects_buffer.write].obj[i].id == 6)			//将黄圆柱都改为黄圆锥
-						{
-							objects_buffer.buffer[objects_buffer.write].obj[i].id = 0;
-						}
-						
-						objects_buffer.buffer[objects_buffer.write].obj[i].confidence = (float)(camera_uart_buffer.buffer[camera_uart_buffer.read+20]+(camera_uart_buffer.buffer[camera_uart_buffer.read+21]<<8)+(camera_uart_buffer.buffer[camera_uart_buffer.read+22]<<16)+(camera_uart_buffer.buffer[camera_uart_buffer.read+23]<<24));
-						
-						
-							//进行xywh数据处理并计算得物体中心坐标
-						objects_buffer.buffer[objects_buffer.write].obj[i].y_center = Ky * (objects_buffer.buffer[objects_buffer.write].obj[i].x_camera + objects_buffer.buffer[objects_buffer.write].obj[i].h_camera/2) + Dy;
-						objects_buffer.buffer[objects_buffer.write].obj[i].x_center = Kx * (objects_buffer.buffer[objects_buffer.write].obj[i].y_camera + objects_buffer.buffer[objects_buffer.write].obj[i].w_camera/2) + Dx;
-						objects_buffer.buffer[objects_buffer.write].get_time = HAL_GetTick();
-						//盘内检验
-						//正在开发
-						if(objects_buffer.buffer[objects_buffer.write].obj[i].x_center < 0 || objects_buffer.buffer[objects_buffer.write].obj[i].y_center < 15000 || objects_buffer.buffer[objects_buffer.write].obj[i].x_center > 50000 || objects_buffer.buffer[objects_buffer.write].obj[i].y_center > 90000)							
-						{
-							objects_buffer.buffer[objects_buffer.write].object_num --;
-							i--;
-//							if(objects_buffer.buffer[objects_buffer.write].object_num == 0)
-//							{
-//								objects_buffer.write--;
-//							}
-						}
-						
-						
-					}
-					objects_buffer.write = (objects_buffer.write+1)%Objects_Buffer_Len;				//objects缓冲区取模自增
-					
-					
-					//下级见Objects_Buffer_Task进行物体缓冲区的滤波和分拣业务处理
-
-				}
-				else 
-				{
-					camera_uart_buffer.read = (camera_uart_buffer.read+1)%Uart_Buffer_Len;
-					break;
-				}
-				
-				
-				
-				
-			}
-			else
-			{
-				camera_uart_buffer.read = (camera_uart_buffer.read+1)%Uart_Buffer_Len;
-				break;
-			}
-			
-			
-		}
-		
-
-		 
-		
-	}
-		
-}
-	
+  while(1)
+  {
+    // 移除水位阈值判断，持续循环解析串口缓冲区所有数据
+    // 循环读取缓冲区剩余数据
+    while(((camera_uart_buffer.write - camera_uart_buffer.read + Uart_Buffer_Len) % Uart_Buffer_Len) > 4)
+    {
+      if(find_Header()) //发现帧头
+      {
+        // 判断剩余数据是否足够完整一帧
+        uint16_t frame_total_len = camera_uart_buffer.buffer[(camera_uart_buffer.read + 4)] + 8;
+        uint16_t remain_data = (camera_uart_buffer.write - camera_uart_buffer.read + Uart_Buffer_Len) % Uart_Buffer_Len;
+        
+        if(remain_data > frame_total_len) //有效帧判别
+        {
+          // 临时存储当前帧物体数据
+          struct Objects temp_frame;
+          memset(&temp_frame, 0, sizeof(temp_frame));
+          temp_frame.get_time = HAL_GetTick();
+          
+          // 计算物体个数
+          temp_frame.object_num = (camera_uart_buffer.buffer[camera_uart_buffer.read + 4] - 4) / 14;
+          
+          // 遍历解析每个物体
+          for(int i = 0; i < temp_frame.object_num; i++)
+          {
+            uint16_t data_offset = 10 + i * 14;
+            temp_frame.obj[i].x_camera = camera_uart_buffer.buffer[camera_uart_buffer.read + data_offset] + (camera_uart_buffer.buffer[camera_uart_buffer.read + data_offset + 1] << 8);
+            temp_frame.obj[i].y_camera = camera_uart_buffer.buffer[camera_uart_buffer.read + data_offset + 2] + (camera_uart_buffer.buffer[camera_uart_buffer.read + data_offset + 3] << 8);
+            temp_frame.obj[i].w_camera = camera_uart_buffer.buffer[camera_uart_buffer.read + data_offset + 4] + (camera_uart_buffer.buffer[camera_uart_buffer.read + data_offset + 5] << 8);
+            temp_frame.obj[i].h_camera = camera_uart_buffer.buffer[camera_uart_buffer.read + data_offset + 6] + (camera_uart_buffer.buffer[camera_uart_buffer.read + data_offset + 7] << 8);
+            temp_frame.obj[i].id = camera_uart_buffer.buffer[camera_uart_buffer.read + data_offset + 8] + (camera_uart_buffer.buffer[camera_uart_buffer.read + data_offset + 9] << 8);
+            
+            // 将黄圆柱id6改为黄圆锥id0
+            if(temp_frame.obj[i].id == 6)
+            {
+              temp_frame.obj[i].id = 0;
+            }
+            
+            // 置信度解析
+            temp_frame.obj[i].confidence = (float)(
+                camera_uart_buffer.buffer[camera_uart_buffer.read + data_offset + 10]
+                + (camera_uart_buffer.buffer[camera_uart_buffer.read + data_offset + 11] << 8)
+                + (camera_uart_buffer.buffer[camera_uart_buffer.read + data_offset + 12] << 16)
+                + (camera_uart_buffer.buffer[camera_uart_buffer.read + data_offset + 13] << 24)
+            );
+            
+            // 相机坐标转电机中心坐标
+            temp_frame.obj[i].y_center = Ky * (temp_frame.obj[i].x_camera + temp_frame.obj[i].h_camera / 2) + Dy;
+            temp_frame.obj[i].x_center = Kx * (temp_frame.obj[i].y_camera + temp_frame.obj[i].w_camera / 2) + Dx;
+            
+            // 盘内校验，超出范围剔除当前物体
+            if(temp_frame.obj[i].x_center < 2500 
+                || temp_frame.obj[i].y_center < 7000 
+                || temp_frame.obj[i].x_center > 50000 
+                || temp_frame.obj[i].y_center > 100000)
+            {
+              temp_frame.object_num --;
+              i--; //当前物体作废，重新解析下一个
+            }
+          }
+          
+          // 盘内校验后还有有效物体：直接给到机器人目标，置位标志
+          if(temp_frame.object_num > 0)
+          {
+            robot_run.target_object = temp_frame.obj[0]; //取第一个有效物体
+            robot_run.if_get_target = 1;
+          }
+          
+          // 读完当前整帧，read偏移一整帧长度
+          camera_uart_buffer.read = (camera_uart_buffer.read + frame_total_len) % Uart_Buffer_Len;
+        }
+        else 
+        {
+          // 剩余数据不足一帧，跳出循环等待后续串口接收
+          break;
+        }
+      }
+      else
+      {
+        // 未找到帧头，丢弃1字节继续查找
+        camera_uart_buffer.read = (camera_uart_buffer.read + 1) % Uart_Buffer_Len;
+      }
+    }
+    // 无数据时让出CPU，降低占用
+    osDelay(1);
+  }
   /* USER CODE END refreeSystemTask */
 }
 
@@ -416,9 +427,18 @@ void run_Task(void *argument)
 	  robot_run.if_get_target = 0;
 		if(robot_run.run_status == 0 && robot_run.if_get_target == 1)
 		{
+			
 			target_object = robot_run.target_object;
 			
-			
+			 if(target_object.x_center < 3000 
+                || target_object.y_center < 7000 
+                || target_object.x_center > 50000 
+                || target_object.y_center > 100000)
+       {
+						 robot_run.run_status = 0;
+						 continue;
+						 
+       }
 			robot_run.target_objects.objects[robot_run.target_objects.get_num] = target_object;			//压入已分拣序列
 			robot_run.target_objects.get_num++;
 			
